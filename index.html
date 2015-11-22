@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<!-- 2015-11-30 Mon 17:06 -->
+<meta  charset="utf-8" />
+<meta  htto-equiv="X-UA-Compatible" content="chrome=1" />
+<meta  name="generator" content="Org-mode with org-ioslide" />
+<meta  name="author" content="vdemeester" />
+
+
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--This one seems to work all the time, but really small on ipad-->
+<!--<meta name="viewport" content="initial-scale=0.4">-->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="stylesheet" media="all" href="theme/css/default.css" />
+<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css" />
+<link rel="stylesheet" media="all" href="theme/css/small-icon.css" />
+<base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+<script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+
+   <script src="js/jquery-1.7.1.min.js" type="text/javascript"></script>
+
+<script src="js/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML,local/local" type="text/javascript"></script>
+</head>
+<body style="opacity: 0">
+<slides class="layout-widescreen">
+<slide class="title-slide segue nobackground">
+       <aside class="gdbar"><img src="images/docker_icon_trans.png"></aside>
+       <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+       <hgroup class="auto-fadein">
+         <h1 data-config-title><!-- populated from slide_config.json --></h1>
+         <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+         <p data-config-presenter><!-- populated from slide_config.json --></p>
+       </hgroup>
+    </slide>
+  
+<slide id="sec-1"  >
+<hgroup class="">
+       <h2 class=" ">Who am I ?</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-1">
+
+<div class="figure">
+<p><img src="images/docker_icon_trans.png" alt="docker_icon_trans.png" width="100px" style="float: right;" />
+</p>
+</div>
+
+<span style="text-align: right;float:right; display: block; width: 50%;">Docker maintainer<br/>certified trainer<br><span style="font-size: 2em;">🐳</span></span>
+
+
+<ul>
+<li>I'm a developer, devops, craftsman, factotum
+</li>
+<li><i>I 💓 &amp; work @Zenika</i>
+</li>
+<li>I 💓 GNU/Linux, Docker &amp; GNU/Emacs
+</li>
+<li>I 💓 Free-software !
+</li>
+<li>I 💓 <b>Java</b>, <b>Go</b>, Python and much more
+</li>
+<li>And I 💓 unicode, 🚴 &amp; 🚶
+</li>
+</ul>
+
+
+<div class="figure">
+<p><img src="images/ZNK.jpg" alt="ZNK.jpg" width="100px" style="float: right;" />
+</p>
+</div>
+
+<article class="flexbox vcenter">
+<p>
+🐸
+</p>
+</article>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-2"  >
+<hgroup class="">
+       <h2 class=" ">Plan</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-2">
+<ul>
+<li>Docker in a few words
+</li>
+<li>Engine « changelog »
+</li>
+<li>Plug all the things
+<ul>
+<li>Volumes
+</li>
+<li>Network
+</li>
+</ul>
+</li>
+<li>Ecosystem
+<ul>
+<li>Machine
+</li>
+<li>Compose
+</li>
+<li>Swarm
+</li>
+</ul>
+</li>
+<li>Open container foundation &amp; runC
+</li>
+</ul>
+
+<aside class="note">
+  <section>
+<ul>
+<li>Introducing docker engine new features first
+</li>
+<li>Then the one in the ecosystem
+</li>
+<li>and how it fits
+</li>
+</ul>
+
+<p>
+On the ecosystem present machine and bootstrap some machines
+then use them for swarm
+and make it all work together :)
+</p>
+
+  </section>
+</aside>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Docker in a few words</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-3">
+
+<p>
+🐳
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-3-1"  >
+<hgroup class="">
+       <h2 class=" ">Some numbers</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-1">
+<ul class="build">
+<li><b>Dates</b> :
+<ul>
+<li><b><b>march 2013 :</b></b> dotCloud open source Docker engine
+</li>
+<li><b><b>october 2013 :</b></b> DotCloud becoms Docker Inc.
+</li>
+<li><b><b>december 2013:</b></b> Google Compute Engine supports Docker
+</li>
+<li><b><b>april 2014:</b></b> Amazon Web Service supports Docker
+</li>
+<li><b><b>october 2014:</b></b> Partnership with Microsoft
+</li>
+</ul>
+</li>
+<li><b>Numbers</b> :
+<ul>
+<li>150+ Docker Meetup in 50 countries
+</li>
+<li>25,000+ Github stars
+</li>
+<li>200M+ Docker Engine downloads
+</li>
+<li>1000+ Contributors on Docker projects
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-2"  >
+<hgroup class="">
+       <h2 class=" ">Definitions</h2>
+       <h3></h3>
+       </hgroup>
+<article class="larger" id="text-3-2">
+
+<blockquote>
+<p>
+"Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications."
+</p>
+
+<p>
+<span class='float-right'>&#x2013; docker.com</span><br  />
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+"Docker is an open-source project that automates the deployment of applications inside software containers"
+</p>
+
+<p>
+<span class='float-right'>&#x2013; wikipedia.org</span><br  />
+</p>
+</blockquote>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-3" class="fill white nobackground" style="background-image: url(images/goldengate-containers.jpg)">
+<hgroup class="">
+       <h2 class="white ">Shipping analogy</h2>
+       <h3></h3>
+       </hgroup>
+<article class="large" id="text-3-3">
+
+<p>
+Container in "goods" transportation.
+</p>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-4"  >
+<hgroup class="">
+       <h2 class=" ">From shipping containers…</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-4">
+
+<div class="figure">
+<p><img src="images/container_shipping_analogy.png" alt="container_shipping_analogy.png" width="100%" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-5"  >
+<hgroup class="">
+       <h2 class=" ">… to Docker containers</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-5">
+
+<div class="figure">
+<p><img src="images/docker_containers.png" alt="docker_containers.png" width="100%" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-6"  >
+<hgroup class="">
+       <h2 class=" ">Architecture</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-6">
+<blockquote>
+<p>
+Standing on the shoulders of giants
+</p>
+</blockquote>
+
+
+<div class="figure">
+<p><img src="images/vm-vs-docker.png" alt="vm-vs-docker.png" width="550px" style="float: right;" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="images/docker-isolation-small.png" alt="docker-isolation-small.png" width="400px" />
+</p>
+</div>
+
+<p>
+Quick note : <i>Repeat after me</i> <b>Containers ARE NOT VMs !</b>
+</p>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-7"  >
+<hgroup class="">
+       <h2 class=" ">Notions</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-7">
+
+<div class="figure">
+<p><img src="images/docker-filesystems-multilayer-small.png" alt="docker-filesystems-multilayer-small.png" width="400px" style="float: right;" />
+</p>
+</div>
+
+<ul>
+<li>Registry (<i>Distribution</i>)
+</li>
+<li>Images (<i>Construction</i>)
+<ul>
+<li>Template
+</li>
+<li>Read-only
+</li>
+</ul>
+</li>
+<li>Conteneurs (<i>Runtime</i>) :
+<ul>
+<li>Based on image(s)
+</li>
+<li>Has a state
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-8"  >
+<hgroup class="">
+       <h2 class=" ">Show the code 😸</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-8">
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# Run an image…
+$ docker run -ti --rm ubuntu:14.04 /bin/bash
+# … or something more useful
+$ docker run -d -p 8080:8080 -p 80:8000 \
+         -v $PWD/traefik.toml:/traefik.toml \
+         emilevauge/traefik
+# … or totaly crazy
+$ docker run -d -v /tmp/.X11-unix:/tmp/.X11 \
+             -e DISPLAY=unix$DISPLAY \
+             # …
+             --name spotify vdemeester/spotify
+# What is running ?
+$ docker ps
+</pre>
+
+</div>
+
+<article class="flexbox vcenter">
+<p>
+<b>Démo 🙆</b>
+</p>
+</article>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+
+
+</slide>
+<slide id="sec-4" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Engine</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-4">
+
+<p>
+🃏 🂠 🃟
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-4-1"  >
+<hgroup class="">
+       <h2 class=" ">Miscellaneous (1/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-1">
+<ul>
+<li><code>label</code> ps filter : based on container labels (presence and/or value)
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker ps --filter=label=garbage
+# returns container with label garbage, whatever value it has
+$ docker ps --filter=label=garbage=true
+# returns container with label garbage that have true as value
+</pre>
+
+</div>
+
+<ul>
+<li><code>ancestor</code> ps filter : based on images and ancestor images
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker ps --filter=ancestor=ubuntu:14.04 <b>--format "table {{.ID}}\t{{.Image}}"</b>
+# […]
+CONTAINER ID        IMAGE               
+e24c7e6b4aaf        vdemeester/scudcloud
+e24c7e6b4aaf        vdemeester/spotify
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-2"  >
+<hgroup class="">
+       <h2 class=" ">Miscellaneous (2/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-2">
+<ul>
+<li>Stop signal : allowing to replace the container process stopping signal
+<ul>
+<li><code>stop-signal</code> on <code>run</code> command
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# FIXME use something that show signals
+$ docker run --stop-signal=SIGNAME -it busybox sh
+</pre>
+
+</div>
+
+<ul>
+<li><code>STOPSIGNAL</code> on <code>Dockerfile</code> : setup default <code>stop-signal</code>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+FROM busybox
+
+STOPSIGNAL SIGNAME
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-3"  >
+<hgroup class="">
+       <h2 class=" ">Miscellaneous (3/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-3">
+<ul>
+<li>restart policy <b>unless-stopped</b>
+</li>
+</ul>
+
+<blockquote>
+<p>
+Always restart the container regardless of the exit status, but do not
+start it on daemon startup if the container has been put to a stopped
+state before.
+</p>
+</blockquote>
+
+<ul>
+<li>inspect updates (<code>RepoTags</code>, <code>RepoDigests</code>)
+</li>
+</ul>
+
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker inspect --type=image vdemeester/spotify
+# […]
+    "RepoTags": [
+        "vdemeester/spotify:latest"
+    ],
+    "RepoDigests": [],
+# […]
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-4"  >
+<hgroup class="">
+       <h2 class=" ">Build-time arguments</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-4">
+<p>
+Add the possibility to pass environment variable to <code>build</code> —
+e.g. <code>HTTP_PROXY</code> variables 😲.
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+FROM ubuntu:14.04
+# Define the "foo" arg and set a default value
+ARG foo=defaultfoo
+# Create a label "mylabel" and set it to the value of $foo
+LABEL mylabel=$foo
+</pre>
+
+</div>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# label = defaultfoo
+$ docker build -t foo .
+# label = commit123
+$ docker build -t foo --build-arg foo=commit123 .
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-5"  >
+<hgroup class="">
+       <h2 class=" ">Discovery package</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-5">
+<p>
+Add a <code>pkg/discovery</code> package to <b>provide nodes discovery between daemon instances</b>.
+</p>
+
+<ul>
+<li><code>--cluster-store</code>: url of the distributed storage backend
+</li>
+<li><code>--cluster-advertise</code>: address of the daemon instance to advertise
+</li>
+</ul>
+
+
+<ul>
+<li>Used and <i>needed</i> by <code>libnetwork</code>, the new network stack, for the
+<code>overlay</code> multi-host plugin.
+</li>
+
+<li>Examine <code>/info</code> endpoint (<code>docker info</code>) to know which storage
+backend to watch for cluster members. Swarm will use this in the future.
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-4-6"  >
+<hgroup class="">
+       <h2 class=" ">Logging driver update</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-6">
+<ul>
+<li><code>tag</code> : how to format a tag that identifies the container's log
+messages
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker daemon --log-driver=syslog --log-opt tag="{{.ImageName}}/{{.Name}}/{{.ID}}" …
+# Give this in syslog
+Aug  7 18:33:19 HOSTNAME docker/hello-world/foobar/5790672ab6a0[9103]: Hello from Docker.
+</pre>
+
+</div>
+
+<ul>
+<li><code>labels</code> &amp; <code>env</code> options : add additional attributes for use with
+logging drivers that accept them
+</li>
+</ul>
+
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker daemon --log-driver=json-file --log-opt labels=foo --log-opt env=foo,fizz
+# Run a container
+$ docker run --label foo=bar -e fizz=buzz -d -P training/webapp python app.py
+# Look at the json file
+"attrs":{"fizz":"buzz","foo":"bar"}
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-7"  >
+<hgroup class="">
+       <h2 class=" ">Experimental: User Namespaces</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-7">
+<blockquote>
+<p>
+Linux kernel user namespace support provides additional security by
+enabling a process&#x2013;and therefore a container&#x2013;to have a unique range
+of user and group IDs.
+</p>
+</blockquote>
+
+<p>
+In short : <b>root in container can be a different user on host</b>
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker daemon <b>--userns-remap=default</b> …
+$ docker run -itd busybox sh
+# Get the PID of the sh process
+<b>165536</b>   1279 … /bin/sh
+</pre>
+
+</div>
+
+<ul>
+<li>single daemon-wide mapping for all containers
+</li>
+<li>experimental, several restrictions for now
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-5" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Plug all the things</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-5">
+<p>
+… a.k.a. plugins ◲
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-5-1"  >
+<hgroup class="">
+       <h2 class=" ">Extensions, extensions !</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-5-1">
+<ul>
+<li><b>Volume plugins</b>, which allow third-party container data management
+solutions to provide data volumes for containers which operate on
+data, such as databases, queues and key-value stores and other
+stateful applications that use the filesystem.
+</li>
+<li><b>Network plugins</b>, which allow third-party container networking
+solutions to connect containers to container networks, making it
+easier for containers to talk to each other even if they are running
+on different machines.
+</li>
+<li>More to come <code>\o/</code>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-6" class=" segue light quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Volume plugins</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-6">
+
+<aside class="note">
+  <section>
+<p>
+demo : choose a volume plugin and demo it (convoy, kv one @calavera, flocker)
+</p>
+<ul>
+<li><a href="https://github.com/cpuguy83/docker-kvfs-driver">https://github.com/cpuguy83/docker-kvfs-driver</a>
+</li>
+<li><a href="https://github.com/rancher/convoy">https://github.com/rancher/convoy</a>
+</li>
+</ul>
+<p>
+demo : simple volume plugin ?
+</p>
+
+  </section>
+</aside>
+
+
+</article>
+
+</slide>
+<slide id="sec-6-1"  >
+<hgroup class="">
+       <h2 class=" ">Volumes (<code>volume</code>)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-1">
+<ul>
+<li><code>create</code>: Create a volume
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# Using default local driver
+$ docker volume create --name=test
+# Using custom driver…
+$ docker volume create --driver=convoy --name=myconvoy
+# … with custom options
+$ docker volume create --driver=kvfs --opt root=/root/of/keys
+</pre>
+
+</div>
+
+<ul>
+<li><code>rm</code>: Remove a volume
+</li>
+<li><code>inspect</code>: Return low-level information on a volume
+</li>
+<li><code>ls</code>: List volumes
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-6-2"  >
+<hgroup class="">
+       <h2 class=" ">local (built-in)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-2">
+<ul>
+<li>default and historical volumes
+</li>
+<li>tied to the daemon, put in <code>/var/lib/docker{,/0.0}/volumes</code>
+</li>
+<li>Using <code>-v</code> on <code>run</code> create a local volume
+</li>
+</ul>
+
+<p>
+Thus
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker run <b>-v /var/cache/</b> -itd ubuntu /bin/bash
+</pre>
+
+</div>
+
+<p>
+is equivalent to (<i>expect the name</i>)
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker <b>volume create --name cache</b>
+$ docker run <b>-v name:/var/cache</b> -itd ubuntu /bin/bash
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-6-3"  >
+<hgroup class="">
+       <h2 class=" ">kvfs-driver (cpuguy83)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-3">
+<p>
+Provides a <b>FUSE filesystem</b> representation of a <b>key-value store</b>
+(<a href="https://goo.gl/YpgPIA">https://goo.gl/YpgPIA</a> — <a href="https://github.com/cpuguy83/docker-kvfs-driver">https://github.com/cpuguy83/docker-kvfs-driver</a>)
+</p>
+
+<ul>
+<li>Tell <code>docker</code> how to communicate with it and start it
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ echo "unix:///var/run/docker/plugins/kvfs.sock" &gt; /etc/docker/plugins/kvfs.spec
+$ nohup docker-kvfs-driver --store consul --addr $(docker-machine ip paris):8500
+</pre>
+
+</div>
+
+<ul>
+<li>Create volumes and start using it
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker volume create --driver=kvfs --name=kv1
+$ docker run -it -v kv1:/data busybox /bin/sh
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-6-4"  >
+<hgroup class="">
+       <h2 class=" ">convoy (rancher)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-4">
+<p>
+Provides a variety of storage back-ends, supports vendor-specific extensions such
+as snapshots, backups and restore. (<a href="https://github.com/rancher/convoy">https://github.com/rancher/convoy</a>)
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ echo "unix:///var/run/convoy/convoy.sock" &gt; /etc/docker/plugins/convoy.spec
+$ truncate -s 100G data.vol ; truncate -s 1G metadata.vol
+$ sudo losetup /dev/loop5 data.vol ; sudo losetup /dev/loop6 metadata.vol
+$ convoy daemon --drivers devicemapper \
+  --driver-opts dm.datadev=/dev/loop5 \
+  --driver-opts dm.metadatadev=/dev/loop6"
+</pre>
+
+</div>
+
+<ul>
+<li>Create volumes and start using it
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker volume create --driver=convoy --name=myconvoy
+$ docker run -it -v myconvoy:/data busybox /bin/sh
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+
+</slide>
+<slide id="sec-7" class=" segue light quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Network plugins</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-7">
+
+
+</article>
+</slide>
+<slide id="sec-7-1"  >
+<hgroup class="">
+       <h2 class=" ">Networks (<code>network</code>)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-1">
+<ul>
+<li><code>create</code>: Create a network (build-in drivers: bridge, host, none &amp; overlay)
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# Using bridge network (default)
+$ docker network create --driver=bridge test
+# Using overlay network (multi-host)
+$ docker network create --driver=overlay mynetwork
+# … with custom options
+$ docker network create --driver=weave --opt foo=bar myweave
+</pre>
+
+</div>
+
+<ul>
+<li><code>connect</code> / <code>disconnect</code>: connect/disconnect a container to/from a network
+</li>
+<li><code>rm</code>: Remove a network
+</li>
+<li><code>inspect</code>: Return low-level information on a network
+</li>
+<li><code>ls</code>: List networks
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-7-2"  >
+<hgroup class="">
+       <h2 class=" ">Networks (<code>--net</code>)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-2">
+<ul>
+<li><code>--net</code> now uses network from <code>network</code>
+</li>
+<li>Default non-removable networks (backward compatibility)
+<ul>
+<li><code>none</code>
+</li>
+<li><code>host</code>
+</li>
+<li><code>bridge</code>
+</li>
+</ul>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker run <b>--net=none</b> ubuntu ping -c 3 google.com
+$ docker run <b>--net=host</b> ubuntu ip addr
+# […] Same as host
+$ docker run <b>--net=bridge</b> ubuntu ip addr
+# […]
+$ docker run <b>--net=mynet</b> ubuntu ip addr
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-7-3"  >
+<hgroup class="">
+       <h2 class=" ">bridge — built-in</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-3">
+<p>
+<b>isolate a set of container in a new network</b> on a single host.
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker network create <b>--driver=bridge isolated_nw</b>
+$ docker run -d <b>--net=isolated_nw</b> --name nginx nginx
+$ docker run -it <b>--net=isolated_nw</b> busybox ping -c 3 nginx
+PING nginx (172.18.0.2): 56 data bytes
+64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.153 ms
+# […]
+$ docker run -it busybox ping -c nginx
+ping: bad address 'nginx'
+</pre>
+
+</div>
+
+<p>
+<b>⚠ Cannot use <code>--link</code> with user-defined networks ⚠</b>
+</p>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-7-4"  >
+<hgroup class="">
+       <h2 class=" ">overlay — built-in</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-4">
+<p>
+<b>multi-host networking based on VXLAN and key-value stores</b>
+</p>
+
+<ul>
+<li>requires daemons to use <i>the same</i> key-value store
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+<b>oslo</b>   $ docker network create <b>--driver=overlay multihost</b>
+<b>bergen</b> $ docker network ls
+NETWORK ID          NAME                DRIVER
+3a95b1f7ec5e        multihost           overlay
+<b>oslo</b>   $ docker run -d <b>--net=multihost</b> --name=nginx nginx
+<b>bergen</b> $ docker run -it <b>--net=multihost</b> busybox ping -c 3 nginx
+PING nginx (10.0.0.3): 56 data bytes
+64 bytes from 10.0.0.3: seq=0 ttl=64 time=2.662 ms
+# […]
+<b>bergen</b> $ docker run -it busybox ping -c 3 nginx
+ping: bad address 'nginx'
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-7-5"  >
+<hgroup class="">
+       <h2 class=" ">weave — weaveworks (1/2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-5">
+
+<div class="figure">
+<p><img src="images/weave-works.png" alt="weave-works.png" width="100px" style="float: right;" />
+</p>
+</div>
+
+<p>
+<b>multi-host network using bridge and peer connectivity</b>
+</p>
+
+
+<div class="figure">
+<p><img src="images/weave-deployment.png" alt="weave-deployment.png" width="75%" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-7-6"  >
+<hgroup class="">
+       <h2 class=" ">weave — weaveworks (2/2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-7-6">
+<ul>
+<li>Setup the weave network (on each nodes)
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+oslo $ weave launch # Start the bridge on the host
+oslo $ weave connect paris # Optionally connect to another peer
+oslo $ weave launch-plugin # Start the docker plugin
+</pre>
+
+</div>
+
+<ul>
+<li>And play with it
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+<b>oslo</b>   $ docker network create <b>--driver=weave multiweave</b>
+<b>oslo</b>   $ docker run -d <b>--net=multiweave</b> --name=nginx nginx
+<b>bergen</b> $ docker run -it <b>--net=multiweave</b> busybox ping -c 3 nginx.multiweave
+PING nginx (10.0.0.3): 56 data bytes
+64 bytes from 10.0.0.3: seq=0 ttl=64 time=2.662 ms
+# […]
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-8" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Ecosystem</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-8">
+
+<p>
+Community 💖
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-8-1"  >
+<hgroup class="">
+       <h2 class=" ">Ecosystem</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-8-1">
+
+<div class="figure">
+<p><img src="images/animals-august2015.png" alt="animals-august2015.png" width="500px" style="float: right;" />
+</p>
+</div>
+
+<ul>
+<li>Docker Inc.
+<ul>
+<li>Compose / Libcompose
+</li>
+<li>Swarm
+</li>
+<li>Machine / Libmachine
+</li>
+</ul>
+</li>
+<li>Ailleurs
+<ul>
+<li>Kubernetes (Google)
+</li>
+<li>Rancher (Rancher)
+</li>
+<li>Flocker (ClusterHQ)
+</li>
+<li>…
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+
+</slide>
+<slide id="sec-9" class=" segue light quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Machine</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-9">
+
+
+<div class="figure">
+<p><img src="images/docker_machine_green.png" alt="docker_machine_green.png" width="200px" style="float: right;" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+<slide id="sec-9-1"  >
+<hgroup class="">
+       <h2 class=" ">What is Machine</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-9-1">
+
+<div class="figure">
+<p><img src="images/logo_machine.png" alt="logo_machine.png" width="200px" style="float: right;" />
+</p>
+</div>
+
+<blockquote>
+<p>
+Machine lets you create Docker hosts on your computer, on cloud
+providers, and inside your own data center. It creates servers,
+installs Docker on them, then configures the Docker client to talk to
+them.
+</p>
+
+<p>
+<span class='float-right'>&#x2013; docs.docker.com</span><br  />
+</p>
+</blockquote>
+
+<ul>
+<li>Providers : cloud (aws, azure, …), local (vmware, virtualbox), generic
+</li>
+<li>Provisionning : current, experimental, …
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-9-2"  >
+<hgroup class="">
+       <h2 class=" ">Create machine(s)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-9-2">
+<ul>
+<li><code>create</code> command
+</li>
+<li><code>--driver</code> is mandatory, e.g. <code>virtualbox</code>, <code>amazonec2</code>, <code>azure</code>,
+<code>digitalocean</code>, …
+</li>
+<li>Specific provider options possible, e.g. <code>--amazonec2-access-key</code>.
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+docker-machine create <b>--driver=virtualbox</b> \
+               <b>--engine-label country=norway</b> \
+               --engine-label city=trondheim \
+               <b>--engine-opt="cluster-store=consul://${PARIS_IP}:8500"</b> \
+               --engine-opt="cluster-advertise=eth1:2376" \
+               <b>--swarm</b> \
+               --swarm-discovery consul://${PARIS_IP}:8500 \
+               <b>trondheim</b> || true
+</pre>
+
+</div>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-9-3"  >
+<hgroup class="">
+       <h2 class=" ">Other options</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-9-3">
+<ul>
+<li><code>env</code>
+</li>
+<li><code>inspect</code>
+</li>
+<li><code>ls</code>
+</li>
+<li><code>ssh</code>, <code>scp</code>
+</li>
+<li><code>start</code>, <code>stop</code>, <code>kill</code>, <code>restart</code>, <code>status</code>, <code>rm</code>.
+</li>
+<li><code>upgrade</code>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-9-4"  >
+<hgroup class="">
+       <h2 class=" ">Latest changes</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-9-4">
+<ul>
+<li>Pluggable driver model (execution model <i>à-la-git</i>)
+<ul>
+<li><code>docker-machine</code>, <code>docker-machine-driver-virtualbox</code>, <code>docker-machine-driver-yours</code>
+</li>
+</ul>
+</li>
+<li>Provisioners
+<ul>
+<li>Add support for CoreOS, SUSE and Arch Linux
+</li>
+</ul>
+</li>
+<li>Drivers
+<ul>
+<li>few improvements on several drivers
+</li>
+<li>"Enhancements around robustness of the created host-only network" 😍
+</li>
+</ul>
+</li>
+
+<li>Clean up code to be more modular and reusable in <code>libmachine</code>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-10" class=" segue light quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Swarm</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-10">
+
+
+<div class="figure">
+<p><img src="images/logo_swarm.png" alt="logo_swarm.png" width="200px" style="float: right;" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+<slide id="sec-10-1"  >
+<hgroup class="">
+       <h2 class=" ">What is Swarm</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-10-1">
+
+<div class="figure">
+<p><img src="images/logo_swarm.png" alt="logo_swarm.png" width="200px" style="float: right;" />
+</p>
+</div>
+
+<blockquote>
+<p>
+Docker Swarm is <b>native clustering</b> for Docker. It turns a pool of
+Docker hosts into a single, virtual host.
+</p>
+</blockquote>
+
+<blockquote>
+<p>
+<b>Swarm serves the standard Docker API</b>, so any tool which already
+communicates with a Docker daemon can use Swarm to transparently scale
+to multiple hosts: Dokku, Compose, Krane, Flynn, Deis, DockerUI,
+Shipyard, Drone, Jenkins&#x2026; and, of course, the Docker client itself.
+</p>
+
+<p>
+<span class='float-right'>&#x2013; docs.docker.com</span><br  />
+</p>
+</blockquote>
+
+<p>
+In a word : <b>Manage your cluster as you manage your docker host</b>
+</p>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-10-2"  >
+<hgroup class="">
+       <h2 class=" ">Swarm (1/2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-10-2">
+<ul>
+<li>One or more manager
+</li>
+<li>Agents by host (unless using static discovery)
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+# Manager
+$ docker run swarm -H tcp://&lt;swarm_ip:swarm_port&gt; consul://&lt;consul_addr&gt;/&lt;path&gt;
+# Nodes
+$ docker run swarm join --advertise=&lt;nodeip:2375&gt; consul://&lt;consul_addr&gt;/&lt;path&gt;
+</pre>
+
+</div>
+
+<ul>
+<li>Discovery backends
+<ul>
+<li>consul, etcd, zookeeper, <i>hub</i>, <i>static</i> (support range)
+</li>
+</ul>
+</li>
+<li>Scheduler strategy
+<ul>
+<li><code>spread</code>, <code>binpack</code>, <code>random</code>
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-10-3"  >
+<hgroup class="">
+       <h2 class=" ">Swarm (2/2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-10-3">
+<ul>
+<li>Filters
+<ul>
+<li>Constraints:
+</li>
+</ul>
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker run -d -P -e constraint:storage==ssd --name db mysql
+</pre>
+
+</div>
+<ul>
+<li>Affinity
+</li>
+</ul>
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker run -d --name logger -e affinity:container==frontend logger
+</pre>
+
+</div>
+<ul>
+<li>Port, Dependency, Health
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-10-4"  >
+<hgroup class="">
+       <h2 class=" ">Latest changes</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-10-4">
+<ul>
+<li><b>1.0</b> : Production ready <code>\o/</code>
+<ul>
+<li>Heavy testing by Docker Inc.
+</li>
+<li>Almost same performance good for 1000 nodes as 10 nodes
+</li>
+</ul>
+</li>
+
+<li>Integration with libnetwork / new docker network stack (overlay network)
+<ul>
+<li><code>docker network</code> commands supported
+</li>
+</ul>
+</li>
+
+<li>Integration with volume plugins
+<ul>
+<li><code>docker volume</code> commands supported
+</li>
+</ul>
+</li>
+
+<li>Mesos <i>experimental</i> integration (backend)
+</li>
+
+<li>Multi-master and leader election to get high availability
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+
+</slide>
+<slide id="sec-11" class=" segue light quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Compose</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-11">
+
+
+<div class="figure">
+<p><img src="images/logo_compose.png" alt="logo_compose.png" style="float: right;" />
+</p>
+</div>
+
+
+</article>
+
+</slide>
+<slide id="sec-11-1"  >
+<hgroup class="">
+       <h2 class=" ">What is Compose</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-11-1">
+
+<div class="figure">
+<p><img src="images/logo_compose.png" alt="logo_compose.png" style="float: right;" />
+</p>
+</div>
+
+<blockquote>
+<p>
+Compose is a tool for defining and running multi-container
+applications with Docker. With Compose, you define a multi-container
+application in a single file, then spin your application up in a
+single command which does everything that needs to be done to get it
+running.
+</p>
+
+<p>
+<b>Compose is great for development environments, staging servers, and CI.</b>
+</p>
+
+<p>
+<span class='float-right'>&#x2013; docs.docker.com</span><br  />
+</p>
+</blockquote>
+
+<ul>
+<li><b>Compose</b>
+<ul>
+<li>written in python
+</li>
+</ul>
+</li>
+<li><b>Libcompose</b> is a go(lang) port of Compose to be used as a library. <b>experimental</b>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-11-2"  >
+<hgroup class="">
+       <h2 class=" ">Compose 😸</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-11-2">
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="yaml">
+web:
+    <b>build: .</b>
+    command: python app.py
+    links:
+    - db
+    ports:
+    - "8000:8000"
+db:
+    <b>image: postgres</b>
+    environment:
+    - LANG=C
+</pre>
+
+</div>
+
+<p>
+Démarrer la « stack »
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker-compose up
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-11-3"  >
+<hgroup class="">
+       <h2 class=" ">Latest changes (1/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-11-3">
+<ul>
+<li>Available for Windows <code>\o/</code>
+</li>
+<li><code>up</code> now waits for all service to shutdown
+</li>
+<li>Better error message (schema validation)
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+ERROR: Validation failed in file './docker-compose.yml', reason(s):
+Unsupported config option for 'web' service: 'environement'
+</pre>
+
+</div>
+
+<ul>
+<li><code>pause</code> / <code>unpause</code> command implemented
+</li>
+<li>Works with python 3 <code>\o/</code>
+</li>
+<li><code>image</code> supports image digests
+</li>
+
+<li><b>Support</b> volume names and thus <b>volume plugins</b>
+</li>
+<li><b>Support new network</b> with <code>--x-networking</code> (<i>experimental</i>)
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-11-4"  >
+<hgroup class="">
+       <h2 class=" ">Variable interpolation (2/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-11-4">
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="yaml">
+db:
+  image: "postgres:<b>${POSTGRES_VERSION}</b>"
+web:
+  image: busybox
+  environnement:
+    - MY_ECHO=echo
+  command: "<b>$$MY_ECHO hello, world</b>"
+</pre>
+
+</div>
+
+<p>
+<code>$$</code> to escape <code>$</code>
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ POSTGRES_VERSION=9 docker-compose up
+# […]
+Pulling db (postgres:9)...
+# […]
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-11-5"  >
+<hgroup class="">
+       <h2 class=" ">Multiple compose file (3/3)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-11-5">
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="yaml">
+<b>webapp</b>:
+  image: vdemeester/myapp
+</pre>
+
+</div>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="yaml">
+<b>webapp</b>:
+  build: .
+  <b>environnement:
+    - DEBUG=1</b>
+</pre>
+
+</div>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker-compose <b>-f docker-compose.yml -f docker-compose.admin.yml</b> up
+</pre>
+
+</div>
+
+<ul>
+<li>by default look for to <code>docker-compose.yml</code> and
+<code>docker-compose.override.yml</code> recursively.
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-12" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="images/docker_icon_trans.png"></aside><hgroup class="">
+       <h2 class=" ">Open Container Fountation</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-12">
+<p>
+… and runC
+</p>
+
+
+</article>
+</slide>
+<slide id="sec-12-1"  >
+<hgroup class="">
+       <h2 class=" ">Open Container Foundation</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-12-1">
+<blockquote>
+<p>
+The Open Container Initiative is a lightweight, open governance
+structure, to be formed under the auspices of the Linux Foundation,
+for the express purpose of creating open industry standards around
+container formats and runtime.
+</p>
+</blockquote>
+
+<ul>
+<li>Giving the "core" of Docker container back to the community
+<ul>
+<li>So that it's not only Docker Inc. that decide
+</li>
+<li>So that sharing takes place :3
+</li>
+</ul>
+</li>
+<li>The Fondation is lead by the Linux Foundation
+</li>
+<li><a href="https://github.com/opencontainers/specs">Specifications</a> et <a href="https://github.com/opencontainers/runc">Default Implementation (runc)</a>
+<ul>
+<li>Will be integration as sole execution driver (~1.10+)
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-12-2"  >
+<hgroup class="">
+       <h2 class=" ">runc 😸</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-12-2">
+<ul>
+<li>JSON configuration : <code>config.json</code>, <code>runtime.json</code>
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+runc start
+/ $ ps
+PID   USER     COMMAND
+1     daemon   sh
+5     daemon   sh
+/ $
+</pre>
+
+</div>
+
+<ul>
+<li>Simple to use a docker image
+</li>
+</ul>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="sh">
+$ docker export $(docker create busybox) &gt; busybox.tar
+$ mkdir rootfs &amp;&amp; tar -C rootfs -xf busybox.tar
+$ runc spec
+$ runc start
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+
+</slide>
+<slide id="sec-13" class=" thank-you-slide segue nobackground" style="background-image: url(nil)">
+<aside class="gdbar right"><img src="images/docker_icon_trans.png"></aside><article class="flexbox vleft auto-fadein" id="text-13">
+<h2>
+  <p>Thank You 🐸</p>
+</h2>
+<br>
+<p class="auto-fadein" data-config-contact>
+</p>
+</article>
+
+</slide>
+<slide class="backdrop"></slide>
+</slides> 
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body> 
+
+</html>

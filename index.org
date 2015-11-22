@@ -1,0 +1,1114 @@
+#+TITLE: Docker 1.9
+#+SUBTITLE: What\'s new !
+#+DATE: 2015/10/08
+#+AUTHOR: vdemeester
+#+EMAIL: vincent.demeester@zenika.com
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline
+#+OPTIONS: author:t c:nil creator:comment d:(not "LOGBOOK") date:t
+#+OPTIONS: e:t email:nil f:t inline:t num:nil p:nil pri:nil stat:t
+#+OPTIONS: tags:t tasks:t tex:t timestamp:t toc:nil todo:t |:t
+#+CREATOR: Emacs 24.4.1 (Org mode 8.2.10)
+#+DESCRIPTION:
+#+EXCLUDE_TAGS: noexport
+#+KEYWORDS:
+#+LANGUAGE: fr
+#+SELECT_TAGS: export
+
+#+COMPANY: Zenika
+#+WWW: http://zenika.com/
+#+TWITTER: vdemeest
+
+#+FAVICON: images/docker_icon_trans.png
+#+ICON: images/docker_icon_trans.png
+#+HASHTAG: #day-of-docker #norway
+
+* Notes                                                                         :noexport:
+** TODO Setup local registry
+   - State "TODO"       from ""           [2015-11-21 Sat 12:38]
+** TODO Put trondheim commands into slides
+   - State "TODO"       from ""           [2015-11-22 Sun 13:29]
+** DONE Have convoy & kvfs-driver binary somewhere
+   - State "DONE"       from "TODO"       [2015-11-25 Wed 08:37]
+   - State "TODO"       from ""           [2015-11-22 Sun 13:30]
+** DONE Provision convoy & kvfs-driver binary to machines
+   - State "DONE"       from "TODO"       [2015-11-25 Wed 08:37]
+   - State "TODO"       from ""           [2015-11-22 Sun 13:31]
+** TODO Idée bingo (pour être sur qu'ils écoutent)
+   - State "TODO"       from ""           [2015-11-25 Wed 18:57]
+** TODO other slides ?
+   - State "TODO"       from ""           [2015-11-22 Sun 13:31]
+** Setup machines
+   :PROPERTIES:
+   :session:  setup
+   :END:
+*** Experimental
+
+#+BEGIN_SRC sh
+  docker-machine create --driver=virtualbox \
+                 --virtualbox-boot2docker-url=http://sirile.github.io/files/boot2docker-1.10.iso \
+                 --engine-opt="userns-remap=default" \
+                 experimental
+#+END_SRC
+
+*** Paris
+
+    Paris will be our control tower, where weave "master", consul and
+    such are running. This will also be were swarm master will be.
+
+    Let's create and start it.
+
+    #+BEGIN_SRC sh :result raw
+      docker-machine create --driver=virtualbox \
+                     --engine-label country=france \
+                     --engine-label city=paris \
+                     --engine-storage-driver=overlay \
+                     paris || true
+      docker-machine start paris || true
+      PARIS_IP=$(docker-machine ip paris)
+    #+END_SRC
+
+    Now let's start consul for the discovery stuff.
+
+    #+BEGIN_SRC sh :result raw
+     docker $(docker-machine config paris) \
+            run -d -p 8400:8400 -p 8500:8500 -p 8600:53/udp \
+            progrium/consul -server -bootstrap -ui-dir /ui
+     echo $PARIS_IP
+    #+END_SRC
+
+    And starts a weave network on it.
+
+    #+BEGIN_SRC sh :result raw
+      eval $(docker-machine env paris)
+      weave launch
+      weave launch-plugin
+      eval $(docker-machine env -u)
+    #+END_SRC
+
+
+*** Oslo
+
+    Oslo is gonna be our swarm master and one of the machine
+    too :). The main one as we are on oslo
+
+    #+BEGIN_SRC sh :result raw
+      docker-machine create --driver=virtualbox \
+                     --engine-label country=norway \
+                     --engine-label city=oslo \
+                     --engine-label storage=ssd \
+                     --engine-storage-driver=overlay \
+                     --engine-opt="cluster-store=consul://${PARIS_IP}:8500" \
+                     --engine-opt="cluster-advertise=eth1:2376" \
+                     --swarm \
+                     --swarm-master \
+                     --swarm-discovery consul://${PARIS_IP}:8500 \
+                     oslo || true
+      docker-machine start oslo || true
+      OSLO_IP=$(docker-machine ip oslo)
+    #+END_SRC
+
+    And connect Oslo to the weave network
+
+    #+BEGIN_SRC sh :result raw
+      eval $(docker-machine env oslo)
+      weave launch
+      weave connect $(docker-machine ip paris)
+      weave launch-plugin
+      eval $(docker-machine env -u)
+    #+END_SRC
+
+    Let's install and kvfs and convoy volume driver
+
+    #+BEGIN_SRC sh :result raw
+      # Install kvfs
+      docker-machine ssh oslo "sudo wget https://goo.gl/YpgPIA -O /usr/bin/docker-kvfs-driver ;
+      sudo chmod +x /usr/bin/docker-kvfs-driver ;
+      sudo mkdir -p /etc/docker/plugins/ ;
+      sudo mkdir -p /var/run/docker/plugins/ ;
+      sudo sh -c 'echo \"unix:///var/run/docker/plugins/kvfs.sock\" > /etc/docker/plugins/kvfs.spec' ;
+      sudo nohup docker-kvfs-driver --store consul --addr $(docker-machine ip paris):8500 "
+
+      # Install convoy
+      docker-machine ssh oslo "sudo wget https://goo.gl/ZQTVPo -O /usr/bin/convoy ;
+      sudo wget https://goo.gl/B134lz -O /usr/bin/convoy-pdata_tools ;
+      sudo chmod +x /usr/bin/convoy ;
+      sudo chmod +x /usr/bin/convoy-pdata_tools ;
+      sudo mkdir -p /etc/docker/plugins/ ;
+      sudo mkdir -p /var/run/docker/plugins/ ;
+      sudo sh -c 'echo \"unix:///var/run/convoy/convoy.sock\" > /etc/docker/plugins/convoy.spec' ;
+      truncate -s 100G data.vol ;
+      truncate -s 1G metadata.vol ;
+      sudo losetup /dev/loop5 data.vol ;
+      sudo losetup /dev/loop6 metadata.vol ;
+      sudo nohup convoy daemon --drivers devicemapper --driver-opts dm.datadev=/dev/loop5 --driver-opts dm.metadatadev=/dev/loop6"
+    #+END_SRC
+
+
+*** Bergen
+
+    Bergen are far away in north, they will be our other nodes.
+
+    #+BEGIN_SRC sh :result raw
+      docker-machine create --driver=virtualbox \
+                     --engine-label country=norway \
+                     --engine-label city=bergen \
+                     --engine-storage-driver=devicemapper \
+                     --engine-opt="cluster-store=consul://${PARIS_IP}:8500" \
+                     --engine-opt="cluster-advertise=eth1:2376" \
+                     --swarm \
+                     --swarm-discovery consul://${PARIS_IP}:8500 \
+                     bergen || true
+      docker-machine start bergen || true
+      BERGEN_IP=$(docker-machine ip bergen)
+    #+END_SRC
+
+    And connect them to the weave network too.
+
+    #+BEGIN_SRC sh :result raw
+      eval $(docker-machine env bergen)
+      weave launch
+      weave connect $(docker-machine ip paris)
+      weave launch-plugin
+      eval $(docker-machine env -u)
+    #+END_SRC
+
+    Let's install and kvfs and convoy volume driver
+
+    #+BEGIN_SRC sh :result raw
+      # Install kvfs
+      docker-machine ssh bergen "sudo wget https://goo.gl/YpgPIA -O /usr/bin/docker-kvfs-driver ;
+      sudo chmod +x /usr/bin/docker-kvfs-driver ;
+      sudo mkdir -p /etc/docker/plugins/ ;
+      sudo mkdir -p /var/run/docker/plugins/ ;
+      sudo sh -c 'echo \"unix:///var/run/docker/plugins/kvfs.sock\" > /etc/docker/plugins/kvfs.spec' ;
+      sudo nohup docker-kvfs-driver --store consul --addr $(docker-machine ip paris):8500 "
+
+      # Install convoy
+      docker-machine ssh bergen "sudo wget https://goo.gl/ZQTVPo -O /usr/bin/convoy ;
+      sudo wget https://goo.gl/B134lz -O /usr/bin/convoy-pdata_tools ;
+      sudo chmod +x /usr/bin/convoy ;
+      sudo chmod +x /usr/bin/convoy-pdata_tools ;
+      sudo mkdir -p /etc/docker/plugins/ ;
+      sudo mkdir -p /var/run/docker/plugins/ ;
+      sudo sh -c 'echo \"unix:///var/run/convoy/convoy.sock\" > /etc/docker/plugins/convoy.spec' ;
+      truncate -s 100G data.vol ;
+      truncate -s 1G metadata.vol ;
+      sudo losetup /dev/loop5 data.vol ;
+      sudo losetup /dev/loop6 metadata.vol ;
+      sudo nohup convoy daemon --drivers devicemapper --driver-opts dm.datadev=/dev/loop5 --driver-opts dm.metadatadev=/dev/loop6"
+    #+END_SRC
+
+*** Trondheim
+
+    #+BEGIN_SRC sh :result raw
+      docker-machine create --driver=virtualbox \
+                     --engine-label country=norway \
+                     --engine-label city=trondheim \
+                     --engine-opt="cluster-store=consul://${PARIS_IP}:8500" \
+                     --engine-opt="cluster-advertise=eth1:2376" \
+                     --swarm \
+                     --swarm-discovery consul://${PARIS_IP}:8500 \
+                     trondheim || true
+      docker-machine start trondheim || true
+      BERGEN_IP=$(docker-machine ip trondheim)
+    #+END_SRC
+
+    #+BEGIN_SRC sh :result raw
+      eval $(docker-machine env trondheim)
+      weave launch
+      weave connect $(docker-machine ip paris)
+      weave launch-plugin
+      eval $(docker-machine env -u)
+    #+END_SRC
+
+*** Notes
+- http://blog.weave.works/2015/05/27/multi-host-docker-deployment-with-swarm-and-compose-using-weave-0-11/
+- http://weave.works/guides/weave-and-docker-platform/compose-scalable-swarm-cluster-with-weave.html
+-
+
+* Who am I ?
+
+#+ATTR_HTML: :width 100px :style float: right;
+[[file:images/docker_icon_trans.png]]
+
+   #+BEGIN_HTML
+<span style="text-align: right;float:right; display: block; width: 50%;">Docker maintainer<br/>certified trainer<br><span style="font-size: 2em;">🐳</span></span>
+   #+END_HTML
+
+
+   - I'm a developer, devops, craftsman, factotum
+   - /I 💓 & work @Zenika/
+   - I 💓 GNU/Linux, Docker & GNU/Emacs
+   - I 💓 Free-software !
+   - I 💓 *Java*, *Go*, Python and much more
+   - And I 💓 unicode, 🚴 & 🚶
+
+#+ATTR_HTML: :width 100px :style float: right;
+[[file:images/ZNK.jpg]]
+
+#+BEGIN_CENTER
+🐸
+#+END_CENTER
+
+* Plan
+
+- Docker in a few words
+- Engine « changelog »
+- Plug all the things
+  - Volumes
+  - Network
+- Ecosystem
+  - Machine
+  - Compose
+  - Swarm
+- Open container foundation & runC
+
+#+ATTR_HTML: :class note
+#+BEGIN_QUOTE
+- Introducing docker engine new features first
+- Then the one in the ecosystem
+- and how it fits
+
+On the ecosystem present machine and bootstrap some machines
+then use them for swarm
+and make it all work together :)
+#+END_QUOTE
+
+* Docker in a few words
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+🐳
+
+** Some numbers
+
+   #+ATTR_HTML: :class build
+- *Dates* :
+  - **march 2013 :** dotCloud open source Docker engine
+  - **october 2013 :** DotCloud becoms Docker Inc.
+  - **december 2013:** Google Compute Engine supports Docker
+  - **april 2014:** Amazon Web Service supports Docker
+  - **october 2014:** Partnership with Microsoft
+
+  #+ATTR_HTML: :class build
+- *Numbers* :
+  - 150+ Docker Meetup in 50 countries
+  - 25,000+ Github stars
+  - 200M+ Docker Engine downloads
+  - 1000+ Contributors on Docker projects
+
+** Definitions
+:PROPERTIES:
+:ARTICLE:  larger
+:END:
+
+#+BEGIN_QUOTE
+"Docker is an open platform for developers and sysadmins to build, ship, and run distributed applications."
+
+    -- docker.com
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+"Docker is an open-source project that automates the deployment of applications inside software containers"
+
+    -- wikipedia.org
+#+END_QUOTE
+
+** Shipping analogy
+:PROPERTIES:
+:FILL:     images/goldengate-containers.jpg
+:TITLE:    white
+:SLIDE:    white
+:ARTICLE:  large
+:END:
+
+Container in "goods" transportation.
+
+** From shipping containers…
+
+#+ATTR_HTML: :width 100%
+[[file:images/container_shipping_analogy.png]]
+
+** … to Docker containers
+
+#+ATTR_HTML: :width 100%
+[[file:images/docker_containers.png]]
+
+** Architecture
+
+#+BEGIN_QUOTE
+Standing on the shoulders of giants
+#+END_QUOTE
+
+#+ATTR_HTML: :width 550px :style float: right;
+[[file:images/vm-vs-docker.png]]
+
+#+ATTR_HTML: :width 400px
+[[file:images/docker-isolation-small.png]]
+
+Quick note : /Repeat after me/ *Containers ARE NOT VMs !*
+
+** Notions
+
+#+ATTR_HTML: :width 400px :style float: right;
+[[file:images/docker-filesystems-multilayer-small.png]]
+
+- Registry (/Distribution/)
+- Images (/Construction/)
+  - Template
+  - Read-only
+- Conteneurs (/Runtime/) :
+  - Based on image(s)
+  - Has a state
+
+** Show the code 😸
+
+#+BEGIN_SRC sh
+# Run an image…
+$ docker run -ti --rm ubuntu:14.04 /bin/bash
+# … or something more useful
+$ docker run -d -p 8080:8080 -p 80:8000 \
+         -v $PWD/traefik.toml:/traefik.toml \
+         emilevauge/traefik
+# … or totaly crazy
+$ docker run -d -v /tmp/.X11-unix:/tmp/.X11 \
+             -e DISPLAY=unix$DISPLAY \
+             # …
+             --name spotify vdemeester/spotify
+# What is running ?
+$ docker ps
+#+END_SRC
+
+#+BEGIN_CENTER
+*Démo 🙆*
+#+END_CENTER
+
+
+
+* Engine
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+🃏 🂠 🃟
+
+** Miscellaneous (1/3)
+
+- =label= ps filter : based on container labels (presence and/or value)
+
+#+BEGIN_SRC sh
+  $ docker ps --filter=label=garbage
+  # returns container with label garbage, whatever value it has
+  $ docker ps --filter=label=garbage=true
+  # returns container with label garbage that have true as value
+#+END_SRC
+
+- =ancestor= ps filter : based on images and ancestor images
+
+#+BEGIN_SRC sh
+  $ docker ps --filter=ancestor=ubuntu:14.04 <b>--format "table {{.ID}}\t{{.Image}}"</b>
+  # […]
+  CONTAINER ID        IMAGE               
+  e24c7e6b4aaf        vdemeester/scudcloud
+  e24c7e6b4aaf        vdemeester/spotify  
+#+END_SRC
+
+
+** Miscellaneous (2/3)
+
+- Stop signal : allowing to replace the container process stopping signal
+  - =stop-signal= on =run= command
+
+#+BEGIN_SRC sh
+  # FIXME use something that show signals
+  $ docker run --stop-signal=SIGNAME -it busybox sh
+#+END_SRC
+
+  - =STOPSIGNAL= on =Dockerfile= : setup default =stop-signal=
+
+  #+BEGIN_SRC sh
+    FROM busybox
+
+    STOPSIGNAL SIGNAME
+  #+END_SRC
+
+
+** Miscellaneous (3/3)
+
+- restart policy *unless-stopped*
+
+#+BEGIN_QUOTE
+Always restart the container regardless of the exit status, but do not
+start it on daemon startup if the container has been put to a stopped
+state before.
+#+END_QUOTE
+
+- inspect updates (=RepoTags=, =RepoDigests=)
+
+
+#+BEGIN_SRC sh
+  $ docker inspect --type=image vdemeester/spotify
+  # […]
+      "RepoTags": [
+          "vdemeester/spotify:latest"
+      ],
+      "RepoDigests": [],
+  # […]
+#+END_SRC
+
+
+** Build-time arguments
+
+Add the possibility to pass environment variable to =build= —
+e.g. =HTTP_PROXY= variables 😲.
+
+#+BEGIN_SRC sh
+  FROM ubuntu:14.04
+  # Define the "foo" arg and set a default value
+  ARG foo=defaultfoo
+  # Create a label "mylabel" and set it to the value of $foo
+  LABEL mylabel=$foo
+#+END_SRC
+
+#+BEGIN_SRC sh
+  # label = defaultfoo
+  $ docker build -t foo .
+  # label = commit123
+  $ docker build -t foo --build-arg foo=commit123 .
+#+END_SRC
+
+
+** Discovery package
+
+Add a =pkg/discovery= package to *provide nodes discovery between daemon instances*.
+
+- =--cluster-store=: url of the distributed storage backend
+- =--cluster-advertise=: address of the daemon instance to advertise
+
+
+- Used and /needed/ by =libnetwork=, the new network stack, for the
+  =overlay= multi-host plugin.
+
+- Examine =/info= endpoint (=docker info=) to know which storage
+   backend to watch for cluster members. Swarm will use this in the future.
+
+** Logging driver update
+
+- =tag= : how to format a tag that identifies the container's log
+  messages
+
+#+BEGIN_SRC sh
+  $ docker daemon --log-driver=syslog --log-opt tag="{{.ImageName}}/{{.Name}}/{{.ID}}" …
+  # Give this in syslog
+  Aug  7 18:33:19 HOSTNAME docker/hello-world/foobar/5790672ab6a0[9103]: Hello from Docker.
+#+END_SRC
+
+- =labels= & =env= options : add additional attributes for use with
+  logging drivers that accept them
+
+
+#+BEGIN_SRC sh
+  $ docker daemon --log-driver=json-file --log-opt labels=foo --log-opt env=foo,fizz
+  # Run a container
+  $ docker run --label foo=bar -e fizz=buzz -d -P training/webapp python app.py
+  # Look at the json file
+  "attrs":{"fizz":"buzz","foo":"bar"}
+#+END_SRC
+
+
+** Experimental: User Namespaces
+
+#+BEGIN_QUOTE
+Linux kernel user namespace support provides additional security by
+enabling a process--and therefore a container--to have a unique range
+of user and group IDs.
+#+END_QUOTE
+
+In short : *root in container can be a different user on host*
+
+#+BEGIN_SRC sh
+  $ docker daemon <b>--userns-remap=default</b> …
+  $ docker run -itd busybox sh
+  # Get the PID of the sh process
+  <b>165536</b>   1279 … /bin/sh
+#+END_SRC
+
+- single daemon-wide mapping for all containers
+- experimental, several restrictions for now
+
+* Plug all the things
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+  … a.k.a. plugins ◲
+
+** Extensions, extensions !
+
+- *Volume plugins*, which allow third-party container data management
+  solutions to provide data volumes for containers which operate on
+  data, such as databases, queues and key-value stores and other
+  stateful applications that use the filesystem.
+- *Network plugins*, which allow third-party container networking
+  solutions to connect containers to container networks, making it
+  easier for containers to talk to each other even if they are running
+  on different machines.
+- More to come =\o/=
+
+* Volume plugins
+  :PROPERTIES:
+  :SLIDE:    segue light quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+#+ATTR_HTML: :class note
+#+BEGIN_QUOTE
+demo : choose a volume plugin and demo it (convoy, kv one @calavera, flocker)
+- https://github.com/cpuguy83/docker-kvfs-driver
+- https://github.com/rancher/convoy
+demo : simple volume plugin ?
+#+END_QUOTE
+
+** Volumes (=volume=)
+
+- =create=: Create a volume
+
+#+BEGIN_SRC sh
+  # Using default local driver
+  $ docker volume create --name=test
+  # Using custom driver…
+  $ docker volume create --driver=convoy --name=myconvoy
+  # … with custom options
+  $ docker volume create --driver=kvfs --opt root=/root/of/keys
+#+END_SRC
+
+- =rm=: Remove a volume
+- =inspect=: Return low-level information on a volume
+- =ls=: List volumes
+
+
+** local (built-in)
+
+- default and historical volumes
+- tied to the daemon, put in =/var/lib/docker{,/0.0}/volumes=
+- Using =-v= on =run= create a local volume
+
+Thus
+
+#+BEGIN_SRC sh
+  $ docker run <b>-v /var/cache/</b> -itd ubuntu /bin/bash
+#+END_SRC
+
+is equivalent to (/expect the name/)
+
+#+BEGIN_SRC sh
+  $ docker <b>volume create --name cache</b>
+  $ docker run <b>-v name:/var/cache</b> -itd ubuntu /bin/bash
+#+END_SRC
+
+
+** kvfs-driver (cpuguy83)
+
+Provides a *FUSE filesystem* representation of a *key-value store*
+(https://goo.gl/YpgPIA — https://github.com/cpuguy83/docker-kvfs-driver)
+
+- Tell =docker= how to communicate with it and start it
+
+#+BEGIN_SRC sh
+  $ echo "unix:///var/run/docker/plugins/kvfs.sock" > /etc/docker/plugins/kvfs.spec
+  $ nohup docker-kvfs-driver --store consul --addr $(docker-machine ip paris):8500
+#+END_SRC
+
+- Create volumes and start using it
+
+#+BEGIN_SRC sh
+  $ docker volume create --driver=kvfs --name=kv1
+  $ docker run -it -v kv1:/data busybox /bin/sh
+#+END_SRC
+
+** convoy (rancher)
+
+Provides a variety of storage back-ends, supports vendor-specific extensions such
+as snapshots, backups and restore. (https://github.com/rancher/convoy)
+
+#+BEGIN_SRC sh
+  $ echo "unix:///var/run/convoy/convoy.sock" > /etc/docker/plugins/convoy.spec
+  $ truncate -s 100G data.vol ; truncate -s 1G metadata.vol
+  $ sudo losetup /dev/loop5 data.vol ; sudo losetup /dev/loop6 metadata.vol
+  $ convoy daemon --drivers devicemapper \
+    --driver-opts dm.datadev=/dev/loop5 \
+    --driver-opts dm.metadatadev=/dev/loop6"
+#+END_SRC
+
+- Create volumes and start using it
+
+#+BEGIN_SRC sh
+  $ docker volume create --driver=convoy --name=myconvoy
+  $ docker run -it -v myconvoy:/data busybox /bin/sh
+#+END_SRC
+
+
+* Network plugins
+  :PROPERTIES:
+  :SLIDE:    segue light quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+** Networks (=network=)
+
+- =create=: Create a network (build-in drivers: bridge, host, none & overlay)
+
+#+BEGIN_SRC sh
+  # Using bridge network (default)
+  $ docker network create --driver=bridge test
+  # Using overlay network (multi-host)
+  $ docker network create --driver=overlay mynetwork
+  # … with custom options
+  $ docker network create --driver=weave --opt foo=bar myweave
+#+END_SRC
+
+- =connect= / =disconnect=: connect/disconnect a container to/from a network
+- =rm=: Remove a network
+- =inspect=: Return low-level information on a network
+- =ls=: List networks
+
+** Networks (=--net=)
+
+- =--net= now uses network from =network=
+- Default non-removable networks (backward compatibility)
+  - =none=
+  - =host=
+  - =bridge=
+
+#+BEGIN_SRC sh
+  $ docker run <b>--net=none</b> ubuntu ping -c 3 google.com
+  $ docker run <b>--net=host</b> ubuntu ip addr
+  # […] Same as host
+  $ docker run <b>--net=bridge</b> ubuntu ip addr
+  # […]
+  $ docker run <b>--net=mynet</b> ubuntu ip addr
+#+END_SRC
+
+** bridge — built-in
+
+*isolate a set of container in a new network* on a single host.
+
+#+BEGIN_SRC sh
+  $ docker network create <b>--driver=bridge isolated_nw</b>
+  $ docker run -d <b>--net=isolated_nw</b> --name nginx nginx
+  $ docker run -it <b>--net=isolated_nw</b> busybox ping -c 3 nginx
+  PING nginx (172.18.0.2): 56 data bytes
+  64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.153 ms
+  # […]
+  $ docker run -it busybox ping -c nginx
+  ping: bad address 'nginx'
+#+END_SRC
+
+*⚠ Cannot use =--link= with user-defined networks ⚠*
+
+** overlay — built-in
+
+*multi-host networking based on VXLAN and key-value stores*
+
+- requires daemons to use /the same/ key-value store
+
+#+BEGIN_SRC sh
+  <b>oslo</b>   $ docker network create <b>--driver=overlay multihost</b>
+  <b>bergen</b> $ docker network ls
+  NETWORK ID          NAME                DRIVER
+  3a95b1f7ec5e        multihost           overlay
+  <b>oslo</b>   $ docker run -d <b>--net=multihost</b> --name=nginx nginx
+  <b>bergen</b> $ docker run -it <b>--net=multihost</b> busybox ping -c 3 nginx
+  PING nginx (10.0.0.3): 56 data bytes
+  64 bytes from 10.0.0.3: seq=0 ttl=64 time=2.662 ms
+  # […]
+  <b>bergen</b> $ docker run -it busybox ping -c 3 nginx
+  ping: bad address 'nginx'
+#+END_SRC
+
+** weave — weaveworks (1/2)
+
+#+ATTR_HTML: :width 100px :style float: right;
+[[file:images/weave-works.png]]
+
+*multi-host network using bridge and peer connectivity*
+
+#+ATTR_HTML: :width 75%
+[[file:images/weave-deployment.png]]
+
+** weave — weaveworks (2/2)
+
+- Setup the weave network (on each nodes)
+
+#+BEGIN_SRC sh
+  oslo $ weave launch # Start the bridge on the host
+  oslo $ weave connect paris # Optionally connect to another peer
+  oslo $ weave launch-plugin # Start the docker plugin
+#+END_SRC
+
+- And play with it
+
+#+BEGIN_SRC sh
+  <b>oslo</b>   $ docker network create <b>--driver=weave multiweave</b>
+  <b>oslo</b>   $ docker run -d <b>--net=multiweave</b> --name=nginx nginx
+  <b>bergen</b> $ docker run -it <b>--net=multiweave</b> busybox ping -c 3 nginx.multiweave
+  PING nginx (10.0.0.3): 56 data bytes
+  64 bytes from 10.0.0.3: seq=0 ttl=64 time=2.662 ms
+  # […]
+#+END_SRC
+
+* Ecosystem
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+  Community 💖
+
+** Ecosystem
+
+
+#+ATTR_HTML: :width 500px :style float: right;
+[[file:images/animals-august2015.png]]
+
+- Docker Inc.
+  - Compose / Libcompose
+  - Swarm
+  - Machine / Libmachine
+- Ailleurs
+  - Kubernetes (Google)
+  - Rancher (Rancher)
+  - Flocker (ClusterHQ)
+  - …
+
+
+* Machine
+  :PROPERTIES:
+  :SLIDE:    segue light quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+#+ATTR_HTML: :width 200px :style float: right;
+[[file:images/docker_machine_green.png]]
+
+** What is Machine
+
+#+ATTR_HTML: :width 200px :style float: right;
+[[file:images/logo_machine.png]]
+
+#+BEGIN_QUOTE
+Machine lets you create Docker hosts on your computer, on cloud
+providers, and inside your own data center. It creates servers,
+installs Docker on them, then configures the Docker client to talk to
+them.
+
+    -- docs.docker.com
+#+END_QUOTE
+
+- Providers : cloud (aws, azure, …), local (vmware, virtualbox), generic
+- Provisionning : current, experimental, …
+
+
+** Create machine(s)
+
+- =create= command
+- =--driver= is mandatory, e.g. =virtualbox=, =amazonec2=, =azure=,
+  =digitalocean=, …
+- Specific provider options possible, e.g. =--amazonec2-access-key=.
+
+    #+BEGIN_SRC sh :result raw
+      docker-machine create <b>--driver=virtualbox</b> \
+                     <b>--engine-label country=norway</b> \
+                     --engine-label city=trondheim \
+                     <b>--engine-opt="cluster-store=consul://${PARIS_IP}:8500"</b> \
+                     --engine-opt="cluster-advertise=eth1:2376" \
+                     <b>--swarm</b> \
+                     --swarm-discovery consul://${PARIS_IP}:8500 \
+                     <b>trondheim</b> || true
+    #+END_SRC
+
+** Other options
+
+- =env=
+- =inspect=
+- =ls=
+- =ssh=, =scp=
+- =start=, =stop=, =kill=, =restart=, =status=, =rm=.
+- =upgrade=
+
+** Latest changes
+
+- Pluggable driver model (execution model /à-la-git/)
+  - =docker-machine=, =docker-machine-driver-virtualbox=, =docker-machine-driver-yours=
+- Provisioners
+  - Add support for CoreOS, SUSE and Arch Linux
+- Drivers
+  - few improvements on several drivers
+  - "Enhancements around robustness of the created host-only network" 😍
+
+- Clean up code to be more modular and reusable in =libmachine=
+
+* Swarm
+  :PROPERTIES:
+  :SLIDE:    segue light quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+#+ATTR_HTML: :width 200px :style float: right;
+[[file:images/logo_swarm.png]]
+
+** What is Swarm
+
+#+ATTR_HTML: :width 200px :style float: right;
+[[file:images/logo_swarm.png]]
+
+#+BEGIN_QUOTE
+Docker Swarm is *native clustering* for Docker. It turns a pool of
+Docker hosts into a single, virtual host.
+#+END_QUOTE
+
+#+BEGIN_QUOTE
+*Swarm serves the standard Docker API*, so any tool which already
+communicates with a Docker daemon can use Swarm to transparently scale
+to multiple hosts: Dokku, Compose, Krane, Flynn, Deis, DockerUI,
+Shipyard, Drone, Jenkins... and, of course, the Docker client itself.
+
+    -- docs.docker.com
+#+END_QUOTE
+
+In a word : *Manage your cluster as you manage your docker host*
+
+** Swarm (1/2)
+
+- One or more manager
+- Agents by host (unless using static discovery)
+
+#+BEGIN_SRC sh
+# Manager
+$ docker run swarm -H tcp://<swarm_ip:swarm_port> consul://<consul_addr>/<path>
+# Nodes
+$ docker run swarm join --advertise=<nodeip:2375> consul://<consul_addr>/<path>
+#+END_SRC
+
+- Discovery backends
+  - consul, etcd, zookeeper, /hub/, /static/ (support range)
+- Scheduler strategy
+  - =spread=, =binpack=, =random=
+
+** Swarm (2/2)
+
+- Filters
+  - Constraints:
+#+BEGIN_SRC sh
+$ docker run -d -P -e constraint:storage==ssd --name db mysql
+#+END_SRC
+  - Affinity
+#+BEGIN_SRC sh
+$ docker run -d --name logger -e affinity:container==frontend logger
+#+END_SRC
+  - Port, Dependency, Health
+
+** Latest changes
+
+- *1.0* : Production ready =\o/=
+  - Heavy testing by Docker Inc.
+  - Almost same performance good for 1000 nodes as 10 nodes
+
+- Integration with libnetwork / new docker network stack (overlay network)
+  - =docker network= commands supported
+
+- Integration with volume plugins
+  - =docker volume= commands supported
+
+- Mesos /experimental/ integration (backend)
+
+- Multi-master and leader election to get high availability
+
+
+* Compose
+  :PROPERTIES:
+  :SLIDE:    segue light quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+
+#+ATTR_HTML: :style float: right;
+[[file:images/logo_compose.png]]
+
+** What is Compose
+
+#+ATTR_HTML: :style float: right;
+[[file:images/logo_compose.png]]
+
+#+BEGIN_QUOTE
+Compose is a tool for defining and running multi-container
+applications with Docker. With Compose, you define a multi-container
+application in a single file, then spin your application up in a
+single command which does everything that needs to be done to get it
+running.
+
+*Compose is great for development environments, staging servers, and CI.*
+
+    -- docs.docker.com
+#+END_QUOTE
+
+- *Compose*
+  - written in python
+- *Libcompose* is a go(lang) port of Compose to be used as a library. *experimental*
+
+
+** Compose 😸
+
+#+BEGIN_SRC yaml
+web:
+    <b>build: .</b>
+    command: python app.py
+    links:
+    - db
+    ports:
+    - "8000:8000"
+db:
+    <b>image: postgres</b>
+    environment:
+    - LANG=C
+#+END_SRC
+
+Démarrer la « stack »
+
+#+BEGIN_SRC sh
+$ docker-compose up
+#+END_SRC
+
+** Latest changes (1/3)
+
+- Available for Windows =\o/=
+- =up= now waits for all service to shutdown
+- Better error message (schema validation)
+
+#+BEGIN_SRC sh
+ERROR: Validation failed in file './docker-compose.yml', reason(s):
+Unsupported config option for 'web' service: 'environement'
+#+END_SRC
+
+- =pause= / =unpause= command implemented
+- Works with python 3 =\o/=
+- =image= supports image digests
+
+- *Support* volume names and thus *volume plugins*
+- *Support new network* with =--x-networking= (/experimental/)
+
+** Variable interpolation (2/3)
+
+#+BEGIN_SRC yaml
+  db:
+    image: "postgres:<b>${POSTGRES_VERSION}</b>"
+  web:
+    image: busybox
+    environnement:
+      - MY_ECHO=echo
+    command: "<b>$$MY_ECHO hello, world</b>"
+#+END_SRC
+
+=$$= to escape =$=
+
+#+BEGIN_SRC sh
+  $ POSTGRES_VERSION=9 docker-compose up
+  # […]
+  Pulling db (postgres:9)...
+  # […]
+#+END_SRC
+
+** Multiple compose file (3/3)
+
+#+BEGIN_SRC yaml
+  <b>webapp</b>:
+    image: vdemeester/myapp
+#+END_SRC
+
+#+BEGIN_SRC yaml
+  <b>webapp</b>:
+    build: .
+    <b>environnement:
+      - DEBUG=1</b>
+#+END_SRC
+
+#+BEGIN_SRC sh
+  $ docker-compose <b>-f docker-compose.yml -f docker-compose.admin.yml</b> up
+#+END_SRC
+
+- by default look for to =docker-compose.yml= and
+  =docker-compose.override.yml= recursively.
+
+* Open Container Fountation
+  :PROPERTIES:
+  :SLIDE:    segue dark quote
+  :ASIDE:    right bottom
+  :ARTICLE:  flexbox vleft auto-fadein
+  :END:
+  … and runC
+** Open Container Foundation
+
+#+BEGIN_QUOTE
+The Open Container Initiative is a lightweight, open governance
+structure, to be formed under the auspices of the Linux Foundation,
+for the express purpose of creating open industry standards around
+container formats and runtime.
+#+END_QUOTE
+
+- Giving the "core" of Docker container back to the community
+  - So that it's not only Docker Inc. that decide
+  - So that sharing takes place :3
+- The Fondation is lead by the Linux Foundation
+- [[https://github.com/opencontainers/specs][Specifications]] et [[https://github.com/opencontainers/runc][Default Implementation (runc)]]
+  - Will be integration as sole execution driver (~1.10+)
+
+
+** runc 😸
+
+- JSON configuration : =config.json=, =runtime.json=
+
+#+BEGIN_SRC sh
+runc start
+/ $ ps
+PID   USER     COMMAND
+1     daemon   sh
+5     daemon   sh
+/ $
+#+END_SRC
+
+- Simple to use a docker image
+
+#+BEGIN_SRC sh
+$ docker export $(docker create busybox) > busybox.tar
+$ mkdir rootfs && tar -C rootfs -xf busybox.tar
+$ runc spec
+$ runc start
+#+END_SRC
+
+
+* Thank You 🐸
+
+:PROPERTIES:
+:SLIDE: thank-you-slide segue
+:ASIDE: right
+:ARTICLE: flexbox vleft auto-fadein
+:END:
+
+Any questions ?
+
+* Footnotes
+
+[fn:1] Footnote is in here!
+
+demo-plugin 2015 (weave/flocker)
+azure
